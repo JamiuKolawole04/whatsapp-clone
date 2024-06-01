@@ -22,24 +22,39 @@ function login() {
 
     try {
       if (email) {
-        const { data } = await axios.post(CHECK_USER_ROUTE, { email });
+        const {
+          data: { data },
+        } = await axios.post(CHECK_USER_ROUTE, { email });
 
-        console.log(data);
+        dispatch({ type: reducerCases.SET_NEW_USER, newUser: true });
+
+        dispatch({
+          type: reducerCases.SET_USER_INFO,
+          userInfo: {
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            profileImage: data.profilePicture,
+            status: data?.status,
+          },
+        });
       }
     } catch (error) {
-      dispatch({ type: reducerCases.SET_NEW_USER, newUser: true });
+      if (error.response.data?.message === "user not found") {
+        dispatch({ type: reducerCases.SET_NEW_USER, newUser: true });
 
-      dispatch({
-        type: reducerCases.SET_USER_INFO,
-        userInfo: {
-          name,
-          email,
-          profileImage,
-          status: "",
-        },
-      });
+        dispatch({
+          type: reducerCases.SET_USER_INFO,
+          userInfo: {
+            name,
+            email,
+            profileImage,
+            status: "",
+          },
+        });
 
-      router.push("/onboarding");
+        router.push("/onboarding");
+      }
     }
   };
 
