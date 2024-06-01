@@ -1,6 +1,11 @@
 import Image from "next/image";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { FaCamera } from "react-icons/fa";
+
+import ContextMenu from "./ContextMenu";
+import defaultImage from "../../../public/default_avatar.png";
+import PhotoPicker from "./PhotoPicker";
+import PhotoLibrary from "./PhotoLibrary";
 
 function Avatar({ type, image, setImage }) {
   const [hover, setHover] = useState(false);
@@ -9,12 +14,64 @@ function Avatar({ type, image, setImage }) {
     x: 0,
     y: 0,
   });
+  const [grabPhoto, setGrabPhoto] = useState(false);
+  const [showPhotoLibrary, setShowPhotoLibrary] = useState(false);
 
   const showContextMenu = (e) => {
     e.preventDefault();
     setContextMenuCordinates({ x: e.pageX, y: e.pageY });
     setIsContextMenuVisible(true);
   };
+
+  const contextMenuOptions = [
+    { name: "Take Photo", callback: () => {} },
+    {
+      name: "Choose From Library",
+      callback: () => {
+        setShowPhotoLibrary(true);
+      },
+    },
+    {
+      name: "Upload Photo",
+      callback: () => {
+        setGrabPhoto(true);
+      },
+    },
+    {
+      name: "Remove Photo",
+      callback: () => {
+        setImage(defaultImage);
+      },
+    },
+  ];
+
+  const photoPickerChange = async (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    const data = document.createElement("img");
+    reader.onload = (e) => {
+      data.src = e.target.result;
+      data.setAttribute("data-src", e.target.result);
+    };
+
+    reader.readAsDataURL(file);
+    setTimeout(() => {
+      console.log(data.src);
+      setImage(data.src);
+    }, 100);
+  };
+
+  useEffect(() => {
+    if (grabPhoto) {
+      const data = document.getElementById("photo-picker");
+      data.click();
+      document.body.onfocus = () => {
+        setTimeout(() => {
+          setGrabPhoto(false);
+        }, 1000);
+      };
+    }
+  }, [grabPhoto]);
 
   return (
     <Fragment>
@@ -60,6 +117,18 @@ function Avatar({ type, image, setImage }) {
           </div>
         )}
       </div>
+
+      {isContextMenuVisible && (
+        <ContextMenu
+          options={contextMenuOptions}
+          cordinates={contextMenuCordinates}
+          contextMenu={isContextMenuVisible}
+          setContextMenu={setIsContextMenuVisible}
+        />
+      )}
+
+      {showPhotoLibrary && <PhotoLibrary />}
+      {grabPhoto && <PhotoPicker onChange={photoPickerChange} />}
     </Fragment>
   );
 }
