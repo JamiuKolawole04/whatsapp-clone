@@ -35,7 +35,7 @@ function onboarding() {
 
       try {
         const {
-          data: { status, id },
+          data: { status, user },
         } = await axios.post(ONBAORD_USER_ROUTE, {
           name,
           email,
@@ -49,7 +49,7 @@ function onboarding() {
           dispatch({
             type: reducerCases.SET_USER_INFO,
             userInfo: {
-              id,
+              id: user.id,
               name,
               email,
               profileImage: image,
