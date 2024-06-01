@@ -5,14 +5,16 @@ export const checkUser = async (req, res, next) => {
     const { email } = req.body;
 
     if (!email) {
-      return res.json({ status: false, message: "email is required" });
+      return res
+        .status(400)
+        .json({ status: false, message: "email is required" });
     }
 
     const prisma = getPrismaInstance();
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      return res.json({ status: false, message: "user not found" });
+      return res.status(404).json({ status: false, message: "user not found" });
     } else {
       return res.json({ status: true, message: "user found", data: user });
     }
