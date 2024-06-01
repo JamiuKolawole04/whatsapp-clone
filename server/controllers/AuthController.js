@@ -43,3 +43,10 @@ export const onBoardUser = async (req, res, next) => {
     next(error);
   }
 };
+
+export const loginUser = (req, res, next) => {
+  try {
+  } catch (error) {
+    next(error);
+  }
+};
