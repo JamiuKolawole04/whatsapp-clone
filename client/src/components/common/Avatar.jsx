@@ -127,7 +127,12 @@ function Avatar({ type, image, setImage }) {
         />
       )}
 
-      {showPhotoLibrary && <PhotoLibrary />}
+      {showPhotoLibrary && (
+        <PhotoLibrary
+          setImage={setImage}
+          hidePhotoLibrary={setShowPhotoLibrary}
+        />
+      )}
       {grabPhoto && <PhotoPicker onChange={photoPickerChange} />}
     </Fragment>
   );
