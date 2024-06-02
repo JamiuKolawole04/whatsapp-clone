@@ -39,9 +39,10 @@ export const onBoardUser = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: true, message: "success", user
-      
-     });
+      status: true,
+      message: "success",
+      user,
+    });
   } catch (error) {
     next(error);
   }
@@ -49,6 +50,39 @@ export const onBoardUser = async (req, res, next) => {
 
 export const loginUser = (req, res, next) => {
   try {
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllUser = async (req, res, next) => {
+  try {
+    const prisma = getPrismaInstance();
+
+    const users = await prisma.user.findMany({
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        profilePicture: true,
+        about: true,
+      },
+    });
+
+    const usersGroupedByInitialLetter = {};
+
+    users.forEach((user) => {
+      const intitialLetter = user.name.charAt(0).toUpperCase();
+
+      if (!usersGroupedByInitialLetter[intitialLetter]) {
+        usersGroupedByInitialLetter[intitialLetter] = [];
+      }
+
+      usersGroupedByInitialLetter[intitialLetter].push(user);
+    });
+
+    return res.status(200).json({ users: usersGroupedByInitialLetter });
   } catch (error) {
     next(error);
   }
