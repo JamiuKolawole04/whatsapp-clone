@@ -4,6 +4,7 @@ import ChatListHeader from "./ChatListHeader";
 import SearchBar from "./SearchBar";
 import List from "./List";
 import { useStateProvider } from "@/context/StateContext";
+import ContactsList from "./ContactsList";
 
 function ChatList() {
   const [{ contactsPage }] = useStateProvider();
@@ -20,9 +21,14 @@ function ChatList() {
 
   return (
     <div className="bg-panel-header-background flex flex-col max-h-screen z-20">
-      <ChatListHeader />
-      <SearchBar />
-      <List />
+      {pageType === "default" && (
+        <Fragment>
+          <ChatListHeader />
+          <SearchBar />
+          <List />
+        </Fragment>
+      )}
+      {pageType === "all-contacts" && <ContactsList />}
     </div>
   );
 }
