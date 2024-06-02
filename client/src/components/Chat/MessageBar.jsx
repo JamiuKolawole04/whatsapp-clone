@@ -1,6 +1,8 @@
 import React from "react";
 import { BsEmojiSmile } from "react-icons/bs";
+import { FaMicrophone } from "react-icons/fa";
 import { ImAttachment } from "react-icons/im";
+import { MdSend } from "react-icons/md";
 
 function MessageBar() {
   return (
@@ -23,6 +25,19 @@ function MessageBar() {
           placeholder="type a message"
           className="bg-input-background text-sm focus:outline-none text-white h-10 rounded-lg px-5 py-4 w-full"
         />
+      </div>
+
+      <div className="flex w-10 items-center justify-center">
+        <button>
+          <MdSend
+            className="text-panel-header-icon cursor-pointer text-xl"
+            title="send message"
+          />
+          <FaMicrophone
+            className="text-panel-header-icon cursor-pointer text-xl"
+            title="Record message"
+          />
+        </button>
       </div>
     </div>
   );

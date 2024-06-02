@@ -3,11 +3,16 @@ import { BsFillChatLeftTextFill, BsThreeDotsVertical } from "react-icons/bs";
 
 import Avatar from "../common/Avatar";
 import { useStateProvider } from "@/context/StateContext";
+import { reducerCases } from "@/context/constants";
 
 function ChatListHeader() {
   const [{ userInfo }, dispatch] = useStateProvider();
 
-  console.log({ userInfo });
+  const handleAllContactsPage = () => {
+    dispatch({
+      type: reducerCases.SET_ALL_CONTACT_PAGE,
+    });
+  };
 
   return (
     <div className="h-16 px-4 py-3 flex justify-between items-center">
@@ -19,6 +24,7 @@ function ChatListHeader() {
         <BsFillChatLeftTextFill
           className="text-panel-header-icon cursor-pointer text-xl"
           title="New Chat"
+          onClick={handleAllContactsPage}
         />
 
         <Fragment>
