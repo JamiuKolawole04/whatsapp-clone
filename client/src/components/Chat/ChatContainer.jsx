@@ -1,6 +1,9 @@
 import React from "react";
 
+import { useStateProvider } from "@/context/StateContext";
+
 function ChatContainer() {
+  const [{ messages, userInfo, currentChatUser }] = useStateProvider();
   return (
     <div className="h-[80vh] w-full relative flex-grow overflow-auto custom-scrollbar">
       <div className="bg-chat-background bg-fixed h-full w-full opacity-5 fixed left-0 top-0 z-0">
@@ -8,7 +11,11 @@ function ChatContainer() {
           <div
             className="flex flex-col justify-end w-full gap-1 overflow-auto
           "
-          ></div>
+          >
+            {messages.map((message, index) => (
+              <div key={message.id} className={`${message?.senderId}`}></div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
