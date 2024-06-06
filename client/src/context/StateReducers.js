@@ -37,7 +37,7 @@ export const reducer = (state, action) => {
     case reducerCases.SET_MESSAGE:
       return {
         ...state,
-        messages: action.messages,
+        messages: action.payload,
       };
     default:
       return state;

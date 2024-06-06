@@ -54,15 +54,13 @@ function Main() {
 
   const geMessages = async () => {
     try {
-      const {
-        data: { messages },
-      } = await axios.get(
+      const { data } = await axios.get(
         `${GET_MESSAGE_ROUTE}/${userInfo?.id}/${currentChatUser?.id}`
       );
 
       dispatch({
         type: reducerCases.SET_MESSAGE,
-        messages,
+        payload: data.messages,
       });
     } catch (error) {
       console.log({ error });
@@ -73,7 +71,7 @@ function Main() {
     if (currentChatUser?.id) {
       geMessages();
     }
-  }, [currentChatUser]);
+  }, [currentChatUser?.id]);
 
   return (
     <div className="grid grid-cols-main h-screen w-screen max-h-screen max-w-full overflow-hidden">
