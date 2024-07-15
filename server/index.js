@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
+import { Server } from "socket.io";
 
 import authRoute from "./routes/AuthRoutes.js";
 import messageRoute from "./routes/MessageRoutes.js";
@@ -24,4 +25,30 @@ const server = app.listen(PORT, () => {
   console.log(`server is running on port ${PORT}`);
 });
 
+const clientOrigin = ["http://localhost:3000"];
+
+const io = new Server(server, {
+  cors: {
+    origin: clientOrigin,
+  },
+});
+
 global.onlineUsers = new Map();
+io.on("connection", (socket) => {
+  global.chatSocket = socket;
+
+  socket.on("add-user", (userId) => {
+    onlineUsers.set(userId, socket.id);
+  });
+
+  socket.on("send-message", (data) => {
+    const getUserSocket = onlineUsers.get(data.to);
+
+    if (getUserSocket) {
+      socket.to(getUserSocket).emit("message-received", {
+        from: data.from,
+        message: data.message,
+      });
+    }
+  });
+});
