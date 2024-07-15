@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import { BsEmojiSmile } from "react-icons/bs";
 import { FaMicrophone } from "react-icons/fa";
 import { ImAttachment } from "react-icons/im";
@@ -9,6 +9,7 @@ import EmojiPicker from "emoji-picker-react";
 import { useStateProvider } from "@/context/StateContext";
 import { ADD_MESSAGE_ROUTE } from "@/utils/ApiRoutes";
 import { reducerCases } from "@/context/constants";
+import PhotoPicker from "../common/PhotoPicker";
 
 function MessageBar() {
   const [{ userInfo, currentChatUser, socket }, dispatch] = useStateProvider();
@@ -16,6 +17,11 @@ function MessageBar() {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef(null);
+  const [grabPhoto, setGrabPhoto] = useState(false);
+
+  const photoPickerChange = async (e) => {
+    alert("working");
+  };
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -35,6 +41,18 @@ function MessageBar() {
       document.removeEventListener("click", handleOutsideClick);
     };
   }, []);
+
+  useEffect(() => {
+    if (grabPhoto) {
+      const data = document.getElementById("photo-picker");
+      data.click();
+      document.body.onfocus = () => {
+        setTimeout(() => {
+          setGrabPhoto(false);
+        }, 1000);
+      };
+    }
+  }, [grabPhoto]);
 
   const handleEmojiModal = () => {
     setShowEmojiPicker((prev) => !prev);
@@ -93,6 +111,7 @@ function MessageBar() {
         <ImAttachment
           className="text-panel-header-icon cursor-pointer text-xl"
           title="Attach file"
+          onClick={() => setGrabPhoto(true)}
         />
       </div>
 
@@ -119,6 +138,8 @@ function MessageBar() {
           />
         </button>
       </div>
+
+      {grabPhoto && <PhotoPicker onChange={photoPickerChange} />}
     </div>
   );
 }
