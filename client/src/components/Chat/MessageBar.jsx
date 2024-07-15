@@ -7,6 +7,7 @@ import { MdSend } from "react-icons/md";
 
 import { useStateProvider } from "@/context/StateContext";
 import { ADD_MESSAGE_ROUTE } from "@/utils/ApiRoutes";
+import { reducerCases } from "@/context/constants";
 
 function MessageBar() {
   const [{ userInfo, currentChatUser, socket }, dispatch] = useStateProvider();
@@ -25,6 +26,12 @@ function MessageBar() {
         from: userInfo?.id,
         to: currentChatUser?.id,
         message: data.message,
+      });
+
+      dispatch({
+        type: reducerCases.ADD_MESSAGE,
+        newMessage: { ...data.message },
+        fromSelf: true,
       });
 
       setMessage("");
