@@ -1,6 +1,6 @@
 import React from "react";
 
-function MessageStatus() {
+function MessageStatus({ messageStatus }) {
   return <div>MessageStatus</div>;
 }
 
