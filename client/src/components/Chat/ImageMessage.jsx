@@ -8,6 +8,7 @@ import MessageStatus from "../common/MessageStatus";
 
 function ImageMessage({ message }) {
   const [{ currentChatUser, userInfo }] = useStateProvider();
+
   return (
     <div
       className={`p-1 rounded-lg ${

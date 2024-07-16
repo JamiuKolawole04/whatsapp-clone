@@ -21,8 +21,6 @@ function MessageBar() {
   const [grabPhoto, setGrabPhoto] = useState(false);
 
   const photoPickerChange = async (e) => {
-    alert("working");
-
     try {
       const file = e.target.files[0];
       const formData = new FormData();
