@@ -7,9 +7,10 @@ import { MdSend } from "react-icons/md";
 import EmojiPicker from "emoji-picker-react";
 
 import { useStateProvider } from "@/context/StateContext";
-import { ADD_MESSAGE_ROUTE } from "@/utils/ApiRoutes";
+import { ADD_IMAGE_MESSAGE_ROUTE, ADD_MESSAGE_ROUTE } from "@/utils/ApiRoutes";
 import { reducerCases } from "@/context/constants";
 import PhotoPicker from "../common/PhotoPicker";
+import { headers } from "next/dist/client/components/headers";
 
 function MessageBar() {
   const [{ userInfo, currentChatUser, socket }, dispatch] = useStateProvider();
@@ -21,6 +22,37 @@ function MessageBar() {
 
   const photoPickerChange = async (e) => {
     alert("working");
+
+    try {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append("image", file);
+      const response = await axios.post(ADD_IMAGE_MESSAGE_ROUTE, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        params: {
+          from: userInfo?.id,
+          to: currentChatUser?.id,
+        },
+      });
+
+      if (response.status === 201) {
+        socket.current.emit("send-message", {
+          from: userInfo?.id,
+          to: currentChatUser?.id,
+          message: response.data.message,
+        });
+
+        dispatch({
+          type: reducerCases.ADD_MESSAGE,
+          newMessage: { ...response.data.message },
+          fromSelf: true,
+        });
+      }
+    } catch (error) {
+      console.log({ error });
+    }
   };
 
   useEffect(() => {

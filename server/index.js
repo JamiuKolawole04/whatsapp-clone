@@ -18,6 +18,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan("dev"));
 
+app.use("/uploads/images", express.static("uploads/images"));
+
 app.use("/api/auth", authRoute);
 app.use("/api/message", messageRoute);
 

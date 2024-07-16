@@ -1,6 +1,7 @@
 import { renameSync } from "node:fs";
 
 import getPrismaInstance from "../utils/PrismaClient.js";
+import { log } from "node:console";
 
 export const addMesage = async (req, res, next) => {
   try {
@@ -82,7 +83,7 @@ export const addImageMessage = async (req, res, next) => {
   try {
     if (req.file) {
       const date = Date.now();
-      let fileName = "uploads/image" + date + req.file.originalName;
+      let fileName = "uploads/images/" + date + req.file.originalname;
       renameSync(req.file.path, fileName);
       const prisma = getPrismaInstance();
       const { from, to } = req.query;
