@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { BiSearchAlt2 } from "react-icons/bi";
 
@@ -7,9 +7,22 @@ import { reducerCases } from "@/context/constants";
 import { calculateTime } from "@/utils/CalculateTime";
 
 function SearchMessages() {
-  const [{ currentChatUser }, dipatch] = useStateProvider();
+  const [{ currentChatUser, messages }, dipatch] = useStateProvider();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchedMessages, setSearchedMessages] = useState([]);
+
+  useEffect(() => {
+    if (searchTerm) {
+      setSearchedMessages(
+        messages.filter(
+          (message) =>
+            message.type === "text" && message.message.includes(searchTerm)
+        )
+      );
+    } else {
+      setSearchedMessages([]);
+    }
+  }, [searchTerm]);
 
   return (
     <div className="border-conversation-border border-1 w-full bg-conversation-panel-background flex flex-col z-10 max-h-screen">
@@ -58,7 +71,11 @@ function SearchMessages() {
           <div className="flex flex-col w-full h-full">
             {searchedMessages.map((message) => (
               <div className="flex cursor-pointer flex-col justify-center hover:bg-background-default-hover w-full px-5 border-b-[0.1px] border-secondary py-5">
-                <div>{calculateTime(message.createdAt)}</div>
+                <div className="text-sm text-secondary">
+                  {calculateTime(message.createdAt)}
+                </div>
+
+                <div className="text-icon-green">{message.message}</div>
               </div>
             ))}
           </div>

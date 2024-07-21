@@ -140,3 +140,88 @@ export const addAudioMessage = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getInitialContactsMessage = async (req, res, next) => {
+  try {
+    const prisma = getPrismaInstance();
+    const userId = parseInt(req.params.from);
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        sentMessages: {
+          include: { receiver: true, sender: true },
+          orderBy: { createdAt: "desc" },
+        },
+        receivedMessages: {
+          include: { receiver: true, sender: true },
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+
+    const messages = [...user.sentMessages, ...user.receivedMessages];
+    messages.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    const users = new Map();
+    const messageStatusChange = [];
+
+    messages.forEach((msg) => {
+      const isSender = msg.senderId === userId;
+      const calculatedId = isSender ? msg.receiverId : msg.senderId;
+
+      if (msg.status === "sent") {
+        messageStatusChange.push(msg.id);
+      }
+
+      if (!users.get(calculatedId)) {
+        const { id, type, message, status, createdAt, senderId, receiverId } =
+          msg;
+
+        let user = {
+          messageId: id,
+          type,
+          message,
+          status,
+          createdAt,
+          senderId,
+          receiverId,
+        };
+
+        if (isSender) {
+          user = { ...user, ...msg.receiver, totalUnreadMessages: 0 };
+        } else {
+          user = {
+            ...user,
+            ...msg.sender,
+            totalUnreadMessages: status != "read" ? 1 : 0,
+          };
+        }
+
+        users.set(calculatedId, { ...user });
+      } else if (msg.status !== "read" && !isSender) {
+        const user = users.get(calculatedId);
+        users.set(calculatedId, {
+          ...user,
+          totalUnreadMessages: user.totalUnreadMessages + 1,
+        });
+      }
+    });
+
+    if (messageStatusChange.length) {
+      await prisma.message.updateMany({
+        where: {
+          id: { in: messageStatusChange },
+        },
+        data: {
+          status: "delivered",
+        },
+      });
+    }
+
+    return res.status(200).json({
+      users: Array.from(users.values()),
+      onlineUsers: Array.from(onlineUsers.keys()),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
