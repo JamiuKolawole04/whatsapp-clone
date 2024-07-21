@@ -10,6 +10,9 @@ import WaveSurfer from "wavesurfer.js";
 import { MdSend } from "react-icons/md";
 
 import { useStateProvider } from "@/context/StateContext";
+import { ADD_AUDIO_MESSAGE_ROUTE } from "@/utils/ApiRoutes";
+import axios from "axios";
+import { reducerCases } from "@/context/constants";
 
 function CaptureAudio({ hide }) {
   const [{ userInfo, currentChatUser, socket }, dispatch] = useStateProvider();
@@ -75,6 +78,8 @@ function CaptureAudio({ hide }) {
     setCurrentPlaybackTime(0);
     setTotalDuration(0);
     setIsRecording(true);
+    setRecordedAudio(null);
+
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then((stream) => {
@@ -146,7 +151,37 @@ function CaptureAudio({ hide }) {
     setIsPlaying(false);
   };
 
-  const sendRecording = async () => {};
+  const sendRecording = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("audio", renderedAudio);
+      const response = await axios.post(ADD_AUDIO_MESSAGE_ROUTE, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        params: {
+          from: userInfo?.id,
+          to: currentChatUser?.id,
+        },
+      });
+
+      if (response.status === 201) {
+        socket.current.emit("send-message", {
+          from: userInfo?.id,
+          to: currentChatUser?.id,
+          message: response.data.message,
+        });
+
+        dispatch({
+          type: reducerCases.ADD_MESSAGE,
+          newMessage: { ...response.data.message },
+          fromSelf: true,
+        });
+      }
+    } catch (error) {
+      console.log({ error });
+    }
+  };
 
   const formatTime = (time) => {
     if (isNaN(time)) {
