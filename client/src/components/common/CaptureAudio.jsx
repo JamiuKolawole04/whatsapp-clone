@@ -21,10 +21,27 @@ function CaptureAudio({ hide }) {
   const [currentPlaybackTime, setCurrentPlaybackTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [renderedAudio, setrenderedAudio] = useState(null);
 
   const audioRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const waveformRef = useRef(null);
+
+  useEffect(() => {
+    let interval;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setRecordingDuration((prevDuration) => {
+          setTotalDuration(prevDuration + 1);
+          return prevDuration + 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [isRecording]);
 
   useEffect(() => {
     const wavesurfer = WaveSurfer.create({
@@ -42,7 +59,9 @@ function CaptureAudio({ hide }) {
       setIsPlaying(false);
     });
 
-    return wavesurfer.destroy();
+    return () => {
+      wavesurfer.destroy();
+    };
   }, []);
 
   useEffect(() => {
@@ -51,13 +70,81 @@ function CaptureAudio({ hide }) {
     }
   }, [waveform]);
 
-  const hanldePlayRecording = () => {};
+  const handleStartRecording = () => {
+    setRecordingDuration(0);
+    setCurrentPlaybackTime(0);
+    setTotalDuration(0);
+    setIsRecording(true);
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((stream) => {
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        audioRef.current.srcObject = stream;
 
-  const handlePauseRecording = () => {};
+        const chunks = [];
+        mediaRecorder.ondataavailable = (e) => {
+          chunks.push(e.data);
+        };
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
+          const audioUrl = URL.createObjectURL(blob);
+          const audio = new Audio(audioUrl);
+          setRecordedAudio(audio);
 
-  const handleStartRecording = () => {};
+          waveform.load(audioUrl);
+        };
 
-  const handleStopRecording = () => {};
+        mediaRecorder.start();
+      })
+      .catch((err) => console.log({ err }));
+  };
+  const handleStopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      waveform.stop();
+
+      const audioChunks = [];
+      mediaRecorderRef.current.addEventListener("dataavailable", (event) => {
+        audioChunks.push(event.data);
+      });
+
+      mediaRecorderRef.current.addEventListener("stop", (event) => {
+        const audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
+        const audioFile = new File([audioBlob], "recording.mp3");
+        setrenderedAudio(audioFile);
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (recordedAudio) {
+      const updatePlaybackTime = () => {
+        setCurrentPlaybackTime(recordedAudio.currentTime);
+      };
+
+      recordedAudio.addEventListener("timeupdate", updatePlaybackTime);
+
+      return () => {
+        recordedAudio.addEventListener("timeupdate", updatePlaybackTime);
+      };
+    }
+  }, [recordedAudio]);
+
+  const hanldePlayRecording = () => {
+    if (recordedAudio) {
+      waveform.stop();
+      waveform.play();
+      recordedAudio.play();
+      setIsPlaying(true);
+    }
+  };
+  const handlePauseRecording = () => {
+    waveform.stop();
+    recordedAudio.pause();
+    setIsPlaying(false);
+  };
 
   const sendRecording = async () => {};
 
@@ -106,28 +193,28 @@ function CaptureAudio({ hide }) {
         )}
 
         <audio ref={audioRef} hidden />
+      </div>
 
-        <div className="mr-4">
-          {!isRecording ? (
-            <FaMicrophone
-              className="text-red-500"
-              onClick={handleStartRecording}
-            />
-          ) : (
-            <FaPauseCircle
-              className="text-red-500"
-              onClick={handleStopRecording}
-            />
-          )}
-        </div>
-
-        <div>
-          <MdSend
-            className="text-panel-header-icon cursor-pointer mr-4"
-            title="Send"
-            onClick={sendRecording}
+      <div className="mr-4">
+        {!isRecording ? (
+          <FaMicrophone
+            className="text-red-500"
+            onClick={handleStartRecording}
           />
-        </div>
+        ) : (
+          <FaPauseCircle
+            className="text-red-500"
+            onClick={handleStopRecording}
+          />
+        )}
+      </div>
+
+      <div>
+        <MdSend
+          className="text-panel-header-icon cursor-pointer mr-4"
+          title="Send"
+          onClick={sendRecording}
+        />
       </div>
     </div>
   );
