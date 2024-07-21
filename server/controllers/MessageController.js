@@ -49,7 +49,7 @@ export const getAllMessage = async (req, res, next) => {
         ],
       },
       orderBy: {
-        id: "asc",
+        createdAt: "asc",
       },
     });
 

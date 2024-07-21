@@ -78,8 +78,6 @@ function VoiceMessage({ message }) {
       .padStart(2, "0")}`;
   };
 
-  console.log({ audioMessage });
-
   const hanldePlayAudio = () => {
     if (audioMessage) {
       waveform.current.stop();
@@ -95,7 +93,7 @@ function VoiceMessage({ message }) {
   };
   return (
     <div
-      className={`flex items-center gap-5 text-white px-4 pr-2 py-4 text-sm ${
+      className={`flex items-center gap-5 text-white px-4 pr-2 py-4 text-sm rounded-lg ${
         message.senderId === currentChatUser?.id
           ? "bg-incoming-background"
           : "bg-outgoing-background"
