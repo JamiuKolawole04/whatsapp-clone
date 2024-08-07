@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { io } from "socket.io-client";
@@ -12,13 +12,25 @@ import { useStateProvider } from "@/context/StateContext";
 import { reducerCases } from "@/context/constants";
 import Chat from "./Chat/Chat";
 import SearchMessages from "./Chat/SearchMessages";
+import VideoCall from "./Call/VideoCall";
+import VoiceCall from "./Call/VoiceCall";
 
 function Main() {
   const router = useRouter();
   const socket = useRef();
 
-  const [{ userInfo, currentChatUser, messageSearch }, dispatch] =
-    useStateProvider();
+  const [
+    {
+      userInfo,
+      currentChatUser,
+      messageSearch,
+      videoCall,
+      voiceCall,
+      incomingVideoCall,
+      incomingVoiceCall,
+    },
+    dispatch,
+  ] = useStateProvider();
 
   const [redirectLogin, setRedirectLogin] = useState(false);
   const [socketEvent, setSocketEvent] = useState(false);
@@ -102,19 +114,35 @@ function Main() {
   }, [currentChatUser?.id]);
 
   return (
-    <div className="grid grid-cols-main h-screen w-screen max-h-screen max-w-full over">
-      <ChatList />
-
-      {currentChatUser ? (
-        <div className={messageSearch ? "grid grid-cols-2" : "grid-cols-2"}>
-          <Chat />
-
-          {messageSearch && <SearchMessages />}
+    <Fragment>
+      {videoCall && (
+        <div className="h-screen w-screen max-h-full overflow-hidden">
+          <VideoCall />
         </div>
-      ) : (
-        <Empty />
       )}
-    </div>
+
+      {voiceCall && (
+        <div className="h-screen w-screen max-h-full overflow-hidden">
+          <VoiceCall />
+        </div>
+      )}
+
+      {!videoCall && !voiceCall && (
+        <div className="grid grid-cols-main h-screen w-screen max-h-screen max-w-full over">
+          <ChatList />
+
+          {currentChatUser ? (
+            <div className={messageSearch ? "grid grid-cols-2" : "grid-cols-2"}>
+              <Chat />
+
+              {messageSearch && <SearchMessages />}
+            </div>
+          ) : (
+            <Empty />
+          )}
+        </div>
+      )}
+    </Fragment>
   );
 }
 
