@@ -10,7 +10,7 @@ function VoiceCall() {
 
   useEffect(() => {
     if (voiceCall.type === "out-going") {
-      socket.current.emit("outoing-voice-call", {
+      socket.current.emit("outgoing-voice-call", {
         to: voiceCall.id,
         from: {
           id: userInfo.id,
