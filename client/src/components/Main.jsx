@@ -92,14 +92,14 @@ function Main() {
         });
       });
 
-      socket.current.on("incoming-voice-call", (from, roomId, callType) => {
+      socket.current.on("incoming-voice-call", ({ from, roomId, callType }) => {
         dispatch({
           type: reducerCases.SET_INCOMING_VOICE_CALL,
           incomingVoiceCall: { ...from, roomId, callType },
         });
       });
 
-      socket.current.on("incoming-video-call", (from, roomId, callType) => {
+      socket.current.on("incoming-video-call", ({ from, roomId, callType }) => {
         dispatch({
           type: reducerCases.SET_INCOMING_VIDEO_CALL,
           incomingVideoCall: { ...from, roomId, callType },
