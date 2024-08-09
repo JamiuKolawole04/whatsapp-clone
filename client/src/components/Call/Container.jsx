@@ -36,6 +36,8 @@ function Container({ data }) {
         console.log(error);
       }
     };
+
+    getToken();
   }, [callAccepted]);
 
   useEffect(() => {
@@ -128,11 +130,18 @@ function Container({ data }) {
     };
 
     if (token) {
+      startCall();
     }
   }, [token]);
 
   const endCall = () => {
     const id = data.id;
+
+    if (zgVar && localStream && publishStream) {
+      zgVar.destroyStream(localStream);
+      zgVar.stopPublishingStream(publishStream);
+      zgVar.logoutRoom(data.roomId.toString());
+    }
 
     if (data.callType === "voice") {
       socket.current.emit("reject-voice-call", { from: id });
